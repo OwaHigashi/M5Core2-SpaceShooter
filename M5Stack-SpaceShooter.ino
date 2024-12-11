@@ -12,7 +12,11 @@
 // Controller   : Buttons A = LEFT, B = RIGHT, C = START or SHOOTING
 // Github:https://macsbug.wordpress.com/2018/01/12/esp32-spaceshooter-with-m5stack/
 //===================================================================
-#include <M5Stack.h>
+#include <M5Core2.h>
+
+// for SD-Updater
+#define SDU_ENABLE_GZ
+#include <M5StackUpdater.h>
 //============================= game variables =========================
 unsigned long offsetM = 0;
 unsigned long offsetT = 0;
@@ -91,14 +95,15 @@ void setup() {
   memset(aFireY, 0, 5);
   memset(aFireAge, 0, 5);
   M5.begin();
-  M5.Lcd.setRotation(0);//M5.Lcd.setRotation(3);
+
+  // for SD-Updater
+  checkSDUpdater( SD, MENU_BIN, 5000 );
+
+  M5.Lcd.setRotation(1);//M5.Lcd.setRotation(3);
   M5.Lcd.fillScreen(ILI9341_BLACK);
   M5.Lcd.setTextColor(0x5E85);
   M5.Lcd.setTextSize(4);
   randomSeed(analogRead(6));
-  pinMode(BUTTON_A_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_B_PIN, INPUT_PULLUP);
-  pinMode(BUTTON_C_PIN, INPUT_PULLUP);
 }
 //==================================================================
 void loop() {
@@ -155,6 +160,7 @@ void loop() {
   if (alienX <= 6){changeAlienX = 3; changeAlienY = 7;}
   alienLiveCount = 0;
   for (int i = 0; i < 18; i++) {
+   Serial.println(i);
    if (alienLive[i]) {
     alienLiveCount += 1;
      if (alienShot(i)) {
@@ -263,7 +269,7 @@ void levelUp() {
 }
 //==================================================================
 boolean alienShot(int num) {
-  for (int i; i < 5; i++) {
+  for (int i = 0; i < 5; i++) {
     if (fFireAge[i] < 20 and fFireAge[i] > 0) {
       if (fFireX[i] > findAlienX(num) - 4 and fFireX[i] < 
          findAlienX(num) + 28 and fFireY[i] < findAlienY(num) + 
